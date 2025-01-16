@@ -1,2 +1,6 @@
-pytest==8.3.4
+-r base.txt
+certifi==2024.12.14
+httpcore==1.0.7
+httpx==0.28.1
 pre_commit==4.0.1
+pytest==8.3.4
