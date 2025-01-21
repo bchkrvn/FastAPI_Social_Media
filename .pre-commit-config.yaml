@@ -19,14 +19,12 @@ repos:
     hooks:
     -   id: flake8
         exclude: application/migration/
-        args: [--max-line-length=120]
 
 -   repo: 'https://github.com/psf/black'
     rev: 23.12.1
     hooks:
     -   id: black
         exclude: application/migration/
-        args: [--line-length=120]
 
 -   repo: local
     hooks:
@@ -44,3 +42,9 @@ repos:
     -   id: autoflake
         exclude: application/migration/
         args: [--remove-all-unused-imports, --in-place]
+
+-   repo: 'https://github.com/pycqa/isort'
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        exclude: application/migration/

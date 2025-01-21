@@ -1,13 +1,27 @@
-from config import settings
 from fastapi import FastAPI
+
+from application.auth.router import auth_router
+from application.config import settings
+from application.user.router import user_router
 
 
 def start_app() -> FastAPI:
     app = FastAPI(
         title=settings.PROJECT_NAME,
         version=settings.PROJECT_VERSION,
+        debug=settings.DEBUG,
     )
+    include_routers(app)
     return app
+
+
+def include_routers(app: FastAPI):
+    routers = (
+        user_router,
+        auth_router,
+    )
+    for r in routers:
+        app.include_router(r)
 
 
 app = start_app()

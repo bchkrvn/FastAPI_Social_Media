@@ -33,3 +33,10 @@ uvloop==0.21.0
 virtualenv==20.28.1
 watchfiles==1.0.4
 websockets==14.1
+bcrypt==4.0.1
+passlib==1.7.4
+ecdsa==0.19.0
+pyasn1==0.6.1
+python-jose==3.3.0
+rsa==4.9
+six==1.17.0

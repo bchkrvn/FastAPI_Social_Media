@@ -1,5 +1,13 @@
+import pytest
+from starlette.status import HTTP_200_OK
+
+
 class TestPing:
-    def test_ping(self, client):
-        response = client.get("/ping")
-        assert response.status_code == 200
+    url = "/ping"
+
+    @pytest.mark.anyio
+    async def test_ping(self, client):
+        response = await client.get(self.url)
+
+        assert response.status_code == HTTP_200_OK
         assert response.json() == {"msg": "pong"}

@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy.orm import Mapped
 
-from application.db.base_aliases import str_uniq
+from application.db.base_aliases import bool_false, bool_true, str_uniq
 from application.db.base_model import Base
 
 
@@ -11,6 +11,9 @@ class User(Base):
     last_name: Mapped[str]
     email: Mapped[str_uniq]
     date_of_birth: Mapped[date]
+    is_active: Mapped[bool_true]
+    password: Mapped[str]
+    is_admin: Mapped[bool_false]
 
     def __str__(self):
         return f"Пользователь {self.id}. {self.first_name} {self.last_name}"
