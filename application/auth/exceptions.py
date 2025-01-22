@@ -12,7 +12,10 @@ NOT_VALID_EMAIL_OR_PASSWORD = "Неверная почта или пароль"
 
 
 def get_401_http_exception(detail: str) -> HTTPException:
-    ex = HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail=detail)
+    ex = HTTPException(
+        status_code=HTTP_401_UNAUTHORIZED,
+        detail=detail,
+    )
     return ex
 
 

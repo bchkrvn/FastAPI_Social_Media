@@ -28,3 +28,23 @@ class BaseDAO:
         session.add(new_object)
         await session.commit()
         return new_object
+
+    @classmethod
+    @connection
+    async def update(cls, instance: model, session: AsyncSession, **data) -> model:
+        unknown_fields = set(data) - instance.all_fields
+        if unknown_fields:
+            raise TypeError(f"Model {cls.__name__} has not fields: {', '.join(unknown_fields)}")
+
+        for key, value in data.items():
+            setattr(instance, key, value)
+
+        session.add(instance)
+        await session.commit()
+        return instance
+
+    @classmethod
+    @connection
+    async def delete(cls, instance: model, session: AsyncSession) -> None:
+        await session.delete(instance)
+        await session.commit()

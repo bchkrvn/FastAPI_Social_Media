@@ -27,7 +27,7 @@ class BaseSettings:
     POSTGRES_PORT = os.getenv("DB_PORT", 5432)
     POSTGRES_DB = os.getenv("POSTGRES_DB")
     DATABASE_URL = (
-        f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:" f"{POSTGRES_PORT}/{POSTGRES_DB}"
+        f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     )
 
 
@@ -55,8 +55,6 @@ class ProdSettings(BaseSettings):
 def get_settings() -> BaseSettings:
     dev = os.getenv("DEV") == "True"
     test = os.getenv("TEST") == "True"
-
-    assert all((dev, test)), "Можно выбрать только один режим"
 
     if test:
         return TestSettings()

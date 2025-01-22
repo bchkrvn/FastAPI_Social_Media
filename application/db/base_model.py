@@ -14,3 +14,9 @@ class Base(AsyncAttrs, DeclarativeBase):
     @declared_attr.directive
     def __tablename__(cls) -> str:
         return f"{cls.__name__.lower()}s"
+
+    @property
+    def all_fields(self) -> set:
+        fields = set(self.__dict__)
+        fields.remove("_sa_instance_state")
+        return fields
