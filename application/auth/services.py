@@ -8,6 +8,7 @@ from application.auth.exceptions import (
     NOT_VALID_DATA,
     TOKEN_NOT_FOUND,
     TOKEN_NOT_VALID,
+    USER_NOT_ACTIVE,
     USER_NOT_FOUND,
     get_401_http_exception,
     get_403_http_exception,
@@ -77,6 +78,9 @@ async def get_current_user(token: str = Depends(get_token)) -> User:
     user = await UsersDAO.find_one_or_none(id=user_id)
     if not user:
         raise get_401_http_exception(USER_NOT_FOUND)
+
+    if not user.is_active:
+        raise get_401_http_exception(USER_NOT_ACTIVE)
 
     return user
 

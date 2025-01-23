@@ -5,6 +5,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from application.auth.services import COOKIES_TOKEN_KEY, create_access_token
 from application.config import settings
 from application.db.base_model import Base
 from application.main import app
@@ -35,9 +36,23 @@ def anyio_backend():
     return "asyncio"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 async def client() -> AsyncClient:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        yield client
+
+
+@pytest.fixture()
+async def auth_client(user) -> AsyncClient:
+    cookies = {COOKIES_TOKEN_KEY: create_access_token(user)}
+    async with AsyncClient(transport=ASGITransport(app=app), cookies=cookies, base_url="http://test") as client:
+        yield client
+
+
+@pytest.fixture()
+async def auth_admin_client(admin) -> AsyncClient:
+    cookies = {COOKIES_TOKEN_KEY: create_access_token(admin)}
+    async with AsyncClient(transport=ASGITransport(app=app), cookies=cookies, base_url="http://test") as client:
         yield client
 
 
