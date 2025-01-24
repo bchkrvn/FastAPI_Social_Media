@@ -15,10 +15,7 @@ class SchemaMeGet(BaseModel):
 
 
 class SchemaMePut(BaseModel):
-    email: str = Field(
-        ...,
-        description="Электронная почта",
-    )
+    email: str = Field(..., description="Электронная почта")
     first_name: str = Field(..., min_length=3, max_length=50, description="Имя")
     last_name: str = Field(..., min_length=3, max_length=50, description="Фамилия")
     date_of_birth: str = Field(..., examples=["01.01.2025"], description="Дата рождения в формате ДД.ММ.ГГГГ")
