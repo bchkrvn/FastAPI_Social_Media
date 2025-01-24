@@ -10,6 +10,11 @@ class UsersDAO(BaseDAO):
     model = User
 
     @classmethod
+    async def find_all_active_user(cls, **filters) -> list[User]:
+        filters["is_active"] = True
+        return await cls.find_all(**filters)
+
+    @classmethod
     @connection
     async def deactivate(cls, instance: User, session: AsyncSession) -> None:
         instance.is_active = False

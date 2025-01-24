@@ -3,7 +3,7 @@ import secrets
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
 from application.auth.constants import COOKIES_TOKEN_KEY
 from application.auth.services import create_access_token
@@ -23,7 +23,7 @@ def engine():
 
 
 @pytest.fixture(scope="session")
-async def create(engine):
+async def create(engine: AsyncEngine) -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -32,7 +32,7 @@ async def create(engine):
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def session(engine, create):
+async def session(engine: AsyncEngine, create) -> AsyncSession:
     async with AsyncSession(engine) as session:
         yield session
 
@@ -55,14 +55,14 @@ async def client() -> AsyncClient:
 
 
 @pytest.fixture()
-async def auth_client(user) -> AsyncClient:
+async def auth_client(user: User) -> AsyncClient:
     cookies = {COOKIES_TOKEN_KEY: create_access_token(user)}
     async with AsyncClient(transport=ASGITransport(app=app), cookies=cookies, base_url="http://test") as client:
         yield client
 
 
 @pytest.fixture()
-async def auth_admin_client(admin) -> AsyncClient:
+async def auth_admin_client(admin: User) -> AsyncClient:
     cookies = {COOKIES_TOKEN_KEY: create_access_token(admin)}
     async with AsyncClient(transport=ASGITransport(app=app), cookies=cookies, base_url="http://test") as client:
         yield client
@@ -94,7 +94,7 @@ async def admin(password, drop_user_table) -> User:
 
 
 @pytest.fixture(scope="function")
-async def drop_user_table(engine):
+async def drop_user_table(engine: AsyncEngine) -> None:
     yield
     async with engine.begin() as conn:
         await conn.run_sync(User.metadata.drop_all)

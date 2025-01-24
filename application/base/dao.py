@@ -2,15 +2,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from application.config import settings
+from application.db.base_model import Base
 from application.db.session import connection
 
 
 class BaseDAO:
-    model = None
+    model: Base
 
     @classmethod
     @connection
-    async def find_all(cls, session: AsyncSession, page: int = 1, **filters):
+    async def find_all(cls, session: AsyncSession, page: int = 1, **filters) -> list:
         limit = page * settings.PAGE_LIMIT
         offset = (page - 1) * settings.PAGE_LIMIT
         query = select(cls.model).filter_by(**filters).limit(limit).offset(offset)
@@ -26,7 +27,7 @@ class BaseDAO:
 
     @classmethod
     @connection
-    async def add(cls, session: AsyncSession, **data) -> model:
+    async def add(cls, session: AsyncSession, **data):
         new_object = cls.model(**data)
         session.add(new_object)
         await session.commit()
@@ -34,10 +35,10 @@ class BaseDAO:
 
     @classmethod
     @connection
-    async def update(cls, instance: model, session: AsyncSession, **data) -> model:
+    async def update(cls, instance: Base, session: AsyncSession, **data):
         unknown_fields = set(data) - instance.all_fields
         if unknown_fields:
-            raise TypeError(f"Model {cls.__name__} has not fields: {', '.join(unknown_fields)}")
+            raise TypeError(f"Model {cls.model.__name__} has not fields: {', '.join(unknown_fields)}")
 
         for key, value in data.items():
             setattr(instance, key, value)
@@ -48,6 +49,6 @@ class BaseDAO:
 
     @classmethod
     @connection
-    async def delete(cls, instance: model, session: AsyncSession) -> None:
+    async def delete(cls, instance: Base, session: AsyncSession) -> None:
         await session.delete(instance)
         await session.commit()
