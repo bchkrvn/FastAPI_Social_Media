@@ -8,4 +8,5 @@ M = TypeVar("M")
 
 class PaginatedResponse(GenericModel, Generic[M]):
     count: int = Field(description="Количество записей")
+    page: int = Field(description="Номер страницы")
     items: List[M] = Field(description="Список элементов, соответствующий заданным критериям")
