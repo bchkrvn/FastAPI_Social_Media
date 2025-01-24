@@ -3,10 +3,10 @@ import datetime
 import pytest
 from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_409_CONFLICT, HTTP_422_UNPROCESSABLE_ENTITY
 
-from application.auth.exceptions import NOT_UNIQUE_USER, NOT_VALID_EMAIL_OR_PASSWORD
-from application.auth.messages import SUCCESS_REGISTRATION
-from application.auth.services import COOKIES_TOKEN_KEY
+from application.auth.constants import COOKIES_TOKEN_KEY
+from application.auth.messages import NOT_VALID_EMAIL_OR_PASSWORD, SUCCESS_REGISTRATION
 from application.user.dao import UsersDAO
+from application.user.messages import NOT_UNIQUE_USER
 
 
 class TestAuthRouterRegister:
@@ -22,14 +22,14 @@ class TestAuthRouterRegister:
     }
 
     @pytest.mark.anyio
-    async def test_register_user_200(self, client):
+    async def test_register_user_200(self, client, drop_user_table):
         response = await client.post(self.url, json=self.user_data)
 
         assert response.status_code == HTTP_200_OK
         assert response.json() == {"message": SUCCESS_REGISTRATION}
 
     @pytest.mark.anyio
-    async def test_register_user_409(self, client):
+    async def test_register_user_409(self, client, user):
         user_data = self.user_data.copy()
         user_data["date_of_birth"] = datetime.date(year=2025, day=1, month=1)
         user = await UsersDAO.add(**user_data)
@@ -53,7 +53,7 @@ class TestAuthRouterLogin:
     url = "/auth/login"
 
     @pytest.mark.anyio
-    async def test_login_200(self, client, user, password):
+    async def test_login_200(self, client, user, password, drop_user_table):
         login_data = {
             "email": user.email,
             "password": password,

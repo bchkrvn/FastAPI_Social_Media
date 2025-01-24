@@ -14,6 +14,7 @@ class BaseSettings:
     PROJECT_VERSION = "1.0.0"
     PROJECT_HOST = os.getenv("PROJECT_HOST", "localhost")
     PROJECT_PORT = os.getenv("PROJECT_PORT", "8000")
+    PAGE_LIMIT = os.getenv("PAGE_LIMIT", 25)
 
     # Настройки безопасности:
     SECRET_KEY = os.getenv("SECRET_KEY")

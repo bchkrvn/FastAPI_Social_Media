@@ -3,7 +3,8 @@ import datetime
 import pytest
 from sqlalchemy.exc import MultipleResultsFound
 
-from application.dao.base import BaseDAO
+from application.base.dao import BaseDAO
+from application.config import settings
 from application.user.model import User
 
 
@@ -14,9 +15,11 @@ class FakeDAO(BaseDAO):
 class TestBaseDAO:
     dao = FakeDAO
 
-    @pytest.mark.anyio
-    async def test_find_all(self, session):
-        user_count = 5
+    @pytest.fixture(scope="function", autouse=True)
+    def drop(self, drop_user_table):
+        yield
+
+    async def create_users(self, user_count, session, **kwargs):
         for i in range(user_count):
             data = {
                 "email": f"test{i}@test.ru",
@@ -24,14 +27,49 @@ class TestBaseDAO:
                 "first_name": "test_name",
                 "last_name": "test_lastname",
                 "date_of_birth": datetime.date(year=2025, day=1, month=1),
+                **kwargs,
             }
             user = User(**data)
             session.add(user)
-        session.commit()
+        await session.commit()
+
+    @pytest.mark.anyio
+    async def test_find_all(self, session):
+        user_count = 5
+        await self.create_users(user_count, session)
 
         users = await FakeDAO.find_all()
 
         assert len(users) == user_count
+
+    @pytest.mark.anyio
+    async def test_find_all_first_page_not_enough(self, session):
+        user_count = settings.PAGE_LIMIT - 1
+        await self.create_users(user_count, session)
+
+        users = await FakeDAO.find_all()
+
+        assert len(users) == user_count
+
+    @pytest.mark.anyio
+    async def test_find_all_first_page_many(self, session):
+        user_count = settings.PAGE_LIMIT + 1
+        await self.create_users(user_count, session)
+
+        users_1 = await FakeDAO.find_all()
+        users_2 = await FakeDAO.find_all(page=1)
+
+        assert len(users_1) == settings.PAGE_LIMIT
+        assert len(users_2) == settings.PAGE_LIMIT
+
+    @pytest.mark.anyio
+    async def test_find_all_last_page(self, session):
+        user_count = settings.PAGE_LIMIT + 1
+        await self.create_users(user_count, session)
+
+        users = await FakeDAO.find_all(page=2)
+
+        assert len(users) == 1
 
     @pytest.mark.anyio
     async def test_find_all_filter(self, session):
@@ -47,7 +85,7 @@ class TestBaseDAO:
             }
             user = User(**data)
             session.add(user)
-        session.commit()
+        await session.commit()
 
         users = await FakeDAO.find_all(is_active=True)
 
@@ -62,17 +100,7 @@ class TestBaseDAO:
     @pytest.mark.anyio
     async def test_find_one_when_many(self, session):
         user_count = 2
-        for i in range(user_count):
-            data = {
-                "email": f"test{i}@test.ru",
-                "password": "1234",
-                "first_name": "test_name",
-                "last_name": "test_lastname",
-                "date_of_birth": datetime.date(year=2025, day=1, month=1),
-            }
-            user = User(**data)
-            session.add(user)
-        session.commit()
+        await self.create_users(user_count, session)
 
         with pytest.raises(MultipleResultsFound):
             await FakeDAO.find_one_or_none(first_name="test_name")
@@ -91,9 +119,13 @@ class TestBaseDAO:
             "last_name": "test_lastname",
             "date_of_birth": datetime.date(year=2025, day=1, month=1),
         }
+
         user = await FakeDAO.add(**data)
 
+        new_user = await FakeDAO.find_one_or_none()
+        assert isinstance(new_user.id, int)
         for f in data:
+            assert getattr(new_user, f) == data[f]
             assert getattr(user, f) == data[f]
 
     @pytest.mark.anyio

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from application.admin.routers import admin_router
 from application.auth.router import auth_router
 from application.config import settings
 from application.user.router import user_router
@@ -19,6 +20,7 @@ def include_routers(app: FastAPI):
     routers = (
         user_router,
         auth_router,
+        admin_router,
     )
     for r in routers:
         app.include_router(r)
@@ -27,6 +29,6 @@ def include_routers(app: FastAPI):
 app = start_app()
 
 
-@app.get("/ping")
+@app.get("/ping", tags=["Проверка работоспособности"])
 async def pong():
     return {"msg": "pong"}

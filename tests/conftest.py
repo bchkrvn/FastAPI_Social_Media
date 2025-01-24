@@ -1,11 +1,12 @@
 import datetime
+import secrets
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
-from application.auth.services import COOKIES_TOKEN_KEY, create_access_token
+from application.auth.constants import COOKIES_TOKEN_KEY
+from application.auth.services import create_access_token
 from application.config import settings
 from application.db.base_model import Base
 from application.main import app
@@ -14,18 +15,29 @@ from application.user.model import User
 from application.user.password import get_password_hash
 
 
-@pytest.fixture(scope="function", autouse=True)
-def session():
-    engine = create_engine(settings.TEST_DATABASE_URL)
-    Base.metadata.create_all(engine)
-    session = sessionmaker(engine)
-    with session() as s:
-        yield s
-
-    Base.metadata.drop_all(engine)
+@pytest.fixture(scope="session")
+def engine():
+    engine = create_async_engine(settings.DATABASE_URL)
+    yield engine
+    engine.sync_engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
+async def create(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def session(engine, create):
+    async with AsyncSession(engine) as session:
+        yield session
+
+
+@pytest.fixture(scope="session")
 def password():
     password = "MW~26MQ%E35xwzH"
     return password
@@ -56,28 +68,34 @@ async def auth_admin_client(admin) -> AsyncClient:
         yield client
 
 
-@pytest.fixture
-async def user(password) -> User:
+@pytest.fixture(scope="function")
+async def user(password, drop_user_table) -> User:
     user_data = {
-        "email": "test@test.ru",
+        "email": f"{secrets.token_urlsafe(10)}@test.test",
         "password": get_password_hash(password),
         "first_name": "test_name",
         "last_name": "test_lastname",
         "date_of_birth": datetime.date(year=2025, day=1, month=1),
     }
-    user = await UsersDAO.add(**user_data)
-    return user
+    return await UsersDAO.add(**user_data)
 
 
-@pytest.fixture
-async def admin(password) -> User:
+@pytest.fixture(scope="function")
+async def admin(password, drop_user_table) -> User:
     user_data = {
-        "email": "test@test.ru",
+        "email": f"{secrets.token_urlsafe(10)}@test.test",
         "password": get_password_hash(password),
-        "first_name": "test_name",
-        "last_name": "test_lastname",
+        "first_name": "admin",
+        "last_name": "admin",
         "date_of_birth": datetime.date(year=2025, day=1, month=1),
         "is_admin": True,
     }
-    user = await UsersDAO.add(**user_data)
-    return user
+    return await UsersDAO.add(**user_data)
+
+
+@pytest.fixture(scope="function")
+async def drop_user_table(engine):
+    yield
+    async with engine.begin() as conn:
+        await conn.run_sync(User.metadata.drop_all)
+        await conn.run_sync(User.metadata.create_all)

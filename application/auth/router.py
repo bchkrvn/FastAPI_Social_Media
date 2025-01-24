@@ -1,13 +1,14 @@
-from fastapi import APIRouter, HTTPException, Response
-from starlette import status
+from fastapi import APIRouter, Response
 
+from application.base.exceptions import get_401_http_exception, get_409_http_exception
 from application.user.dao import UsersDAO
+from application.user.messages import NOT_UNIQUE_USER
 from application.user.password import get_password_hash
 
-from .exceptions import NOT_UNIQUE_USER, NOT_VALID_EMAIL_OR_PASSWORD, get_401_http_exception
-from .messages import SUCCESS_LOGOUT, SUCCESS_REGISTRATION
+from .constants import COOKIES_TOKEN_KEY
+from .messages import NOT_VALID_EMAIL_OR_PASSWORD, SUCCESS_LOGOUT, SUCCESS_REGISTRATION
 from .schemas import SchemaLogin, SchemaRegister
-from .services import COOKIES_TOKEN_KEY, auth_user, create_access_token
+from .services import auth_user, create_access_token
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -19,7 +20,8 @@ auth_router = APIRouter(
 async def register_user(user_data: SchemaRegister) -> dict:
     user = await UsersDAO.find_one_or_none(email=user_data.email)
     if user:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=NOT_UNIQUE_USER.format(user_data.email))
+        detail = NOT_UNIQUE_USER.format(user_data.email)
+        raise get_409_http_exception(detail)
 
     user_dict = user_data.model_dump()
     user_dict["password"] = get_password_hash(user_data.password)

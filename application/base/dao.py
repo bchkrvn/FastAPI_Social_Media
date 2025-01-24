@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from application.config import settings
 from application.db.session import connection
 
 
@@ -9,8 +10,10 @@ class BaseDAO:
 
     @classmethod
     @connection
-    async def find_all(cls, session: AsyncSession, **filters):
-        query = select(cls.model).filter_by(**filters)
+    async def find_all(cls, session: AsyncSession, page: int = 1, **filters):
+        limit = page * settings.PAGE_LIMIT
+        offset = (page - 1) * settings.PAGE_LIMIT
+        query = select(cls.model).filter_by(**filters).limit(limit).offset(offset)
         objects = await session.execute(query)
         return objects.scalars().all()
 

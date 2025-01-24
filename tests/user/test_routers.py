@@ -3,8 +3,8 @@ import datetime
 import pytest
 from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_422_UNPROCESSABLE_ENTITY
 
-from application.auth.exceptions import TOKEN_NOT_FOUND
-from application.auth.services import COOKIES_TOKEN_KEY
+from application.auth.constants import COOKIES_TOKEN_KEY
+from application.auth.messages import TOKEN_NOT_FOUND
 from application.user.dao import UsersDAO
 
 
@@ -41,7 +41,7 @@ class TestMePutRouter:
     url = "/users/me"
 
     @pytest.mark.anyio
-    async def test_me_200(self, auth_client, user, session):
+    async def test_me_200(self, auth_client, user):
         date = datetime.date.today()
         str_date = date.strftime("%d.%m.%Y")
         data = {
@@ -86,7 +86,7 @@ class TestMeDeleteRouter:
     url = "/users/me"
 
     @pytest.mark.anyio
-    async def test_me_200(self, auth_client, user, session):
+    async def test_me_200(self, auth_client, user):
         response = await auth_client.delete(self.url)
 
         assert response.status_code == HTTP_200_OK, response.json()

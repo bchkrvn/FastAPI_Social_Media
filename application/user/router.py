@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
-from starlette.status import HTTP_409_CONFLICT
+from fastapi import APIRouter, Depends, Response
 
-from application.auth.exceptions import NOT_UNIQUE_USER
-from application.auth.services import COOKIES_TOKEN_KEY, get_current_user
+from application.auth.constants import COOKIES_TOKEN_KEY
+from application.auth.depends import get_current_user
+from application.base.exceptions import get_409_http_exception
 from application.user.dao import UsersDAO
-from application.user.messages import SUCCESS_DELETE
+from application.user.messages import NOT_UNIQUE_USER, SUCCESS_DELETE
 from application.user.model import User
 from application.user.schemas import SchemaMeGet, SchemaMePut
 
@@ -23,7 +23,8 @@ async def me(current_user: User = Depends(get_current_user)):
 async def me_update(user_data: SchemaMePut, current_user: User = Depends(get_current_user)) -> dict:
     user = await UsersDAO.find_one_or_none(email=user_data.email)
     if user and user.id != current_user.id:
-        raise HTTPException(status_code=HTTP_409_CONFLICT, detail=NOT_UNIQUE_USER.format(user_data.email))
+        detail = NOT_UNIQUE_USER.format(user_data.email)
+        raise get_409_http_exception(detail)
 
     user_dict = user_data.model_dump(exclude_none=True)
     updated_user = await UsersDAO.update(current_user, **user_dict)
@@ -33,7 +34,6 @@ async def me_update(user_data: SchemaMePut, current_user: User = Depends(get_cur
 
 @user_router.delete("/me")
 async def me_delete(response: Response, current_user: User = Depends(get_current_user)) -> dict:
-    await UsersDAO.delete(current_user)
+    await UsersDAO.deactivate(current_user)
     response.delete_cookie(key=COOKIES_TOKEN_KEY)
-
     return {"message": SUCCESS_DELETE}
