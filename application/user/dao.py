@@ -10,9 +10,13 @@ class UsersDAO(BaseDAO):
     model = User
 
     @classmethod
-    async def find_all_active_user(cls, **filters) -> list[User]:
-        filters["is_active"] = True
-        return await cls.find_all(**filters)
+    async def find_all_active_user(cls, *args, **kwargs) -> list[User]:
+        if "filters" in kwargs:
+            kwargs["filters"].update({"is_active": True})
+        else:
+            kwargs["filters"] = {"is_active": True}
+
+        return await cls.find_all(*args, **kwargs)
 
     @classmethod
     @connection

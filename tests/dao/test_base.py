@@ -87,7 +87,7 @@ class TestBaseDAO:
             session.add(user)
         await session.commit()
 
-        users = await FakeDAO.find_all(is_active=True)
+        users = await FakeDAO.find_all(filters=dict(is_active=True))
 
         assert len(users) == user_count / 2
 
