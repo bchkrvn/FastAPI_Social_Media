@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship
 
 from application.db.base_aliases import bool_false, bool_true, str_uniq
 from application.db.base_model import Base
@@ -15,8 +15,16 @@ class User(Base):
     password: Mapped[str]
     is_admin: Mapped[bool_false]
 
+    posts: Mapped[list["Post"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
     def __str__(self):
-        return f"Пользователь {self.id}. {self.first_name} {self.last_name}"
+        return f"User(id={self.id}, first_name={self.first_name}, last_name={self.last_name})"
 
     def __repr__(self):
         return str(self)
+
+
+from application.post.model import Post  # noqa: E402

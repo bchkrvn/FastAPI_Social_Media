@@ -12,6 +12,7 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
 from application.config import settings
 from application.db.base_model import Base
+from application.post.model import Post
 from application.user.model import User
 
 # this is the Alembic Config object, which provides
