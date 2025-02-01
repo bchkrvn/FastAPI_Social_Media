@@ -10,9 +10,10 @@ load_dotenv(dotenv_path=env_path)
 
 class BaseSettings:
     DEBUG = False
+    DB_DEBUG = False
     PROJECT_NAME = "Social Media"
     PROJECT_VERSION = "1.0.0"
-    PROJECT_HOST = os.getenv("PROJECT_HOST", "localhost")
+    PROJECT_HOST = os.getenv("PROJECT_HOST", "0.0.0.0")
     PROJECT_PORT = os.getenv("PROJECT_PORT", "8000")
     PAGE_LIMIT = os.getenv("PAGE_LIMIT", 25)
 
@@ -34,6 +35,7 @@ class BaseSettings:
 
 class DevSettings(BaseSettings):
     DEBUG = True
+    DB_DEBUG = bool(os.getenv("DB_DEBUG", False))
 
 
 class TestSettings(BaseSettings):
