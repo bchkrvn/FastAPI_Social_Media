@@ -32,19 +32,19 @@ class TestUserDAO:
     async def test_deactivate(self, user: User):
         assert user.is_active
         await UsersDAO.deactivate(user)
-        not_active_user = await UsersDAO.find_one_or_none(id=user.id)
+        not_active_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
         assert not_active_user.id == user.id
         assert not not_active_user.is_active
 
     @pytest.mark.anyio
     async def test_activate(self, user: User, session: AsyncSession):
         await UsersDAO.deactivate(user)
-        not_active_user = await UsersDAO.find_one_or_none(id=user.id)
+        not_active_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
         assert not not_active_user.is_active
         assert not_active_user.id == user.id
 
         await UsersDAO.activate(user)
 
-        active_user = await UsersDAO.find_one_or_none(id=user.id)
+        active_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
         assert active_user.id == user.id
         assert active_user.is_active

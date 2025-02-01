@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from application.admin.routers import admin_router
 from application.auth.router import auth_router
 from application.config import settings
+from application.post.routers import post_router
 from application.user.router import user_router
 
 
@@ -21,6 +22,7 @@ def include_routers(app: FastAPI):
         user_router,
         auth_router,
         admin_router,
+        post_router,
     )
     for r in routers:
         app.include_router(r)

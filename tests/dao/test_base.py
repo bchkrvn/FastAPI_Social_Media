@@ -93,7 +93,8 @@ class TestBaseDAO:
 
     @pytest.mark.anyio
     async def test_find_one(self, user):
-        finded_user = await FakeDAO.find_one_or_none(id=user.id)
+        filters = dict(id=user.id)
+        finded_user = await FakeDAO.find_one_or_none(filters=filters)
 
         assert finded_user.id == user.id
 
@@ -103,11 +104,13 @@ class TestBaseDAO:
         await self.create_users(user_count, session)
 
         with pytest.raises(MultipleResultsFound):
-            await FakeDAO.find_one_or_none(first_name="test_name")
+            filters = dict(first_name="test_name")
+            await FakeDAO.find_one_or_none(filters=filters)
 
     @pytest.mark.anyio
     async def test_find_none(self, user):
-        finded_user = await FakeDAO.find_one_or_none(id=99999)
+        filters = dict(id=99999)
+        finded_user = await FakeDAO.find_one_or_none(filters=filters)
         assert finded_user is None
 
     @pytest.mark.anyio
@@ -122,7 +125,7 @@ class TestBaseDAO:
 
         user = await FakeDAO.add(**data)
 
-        new_user = await FakeDAO.find_one_or_none()
+        new_user = await FakeDAO.find_one_or_none(filters={})
         assert isinstance(new_user.id, int)
         for f in data:
             assert getattr(new_user, f) == data[f]

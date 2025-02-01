@@ -10,6 +10,7 @@ from application.auth.services import create_access_token
 from application.config import settings
 from application.db.base_model import Base
 from application.main import app
+from application.post.model import Post
 from application.user.dao import UsersDAO
 from application.user.model import User
 from application.user.password import get_password_hash
@@ -99,3 +100,11 @@ async def drop_user_table(engine: AsyncEngine) -> None:
     async with engine.begin() as conn:
         await conn.run_sync(User.metadata.drop_all)
         await conn.run_sync(User.metadata.create_all)
+
+
+@pytest.fixture(scope="function")
+async def drop_post_table(engine: AsyncEngine) -> None:
+    yield
+    async with engine.begin() as conn:
+        await conn.run_sync(Post.metadata.drop_all)
+        await conn.run_sync(Post.metadata.create_all)

@@ -21,7 +21,8 @@ def create_access_token(user: User) -> str:
 
 
 async def auth_user(user_data: SchemaLogin) -> User | None:
-    user = await UsersDAO.find_one_or_none(email=user_data.email)
+    filters = dict(email=user_data.email)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if not user:
         return None
 

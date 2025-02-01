@@ -41,7 +41,8 @@ async def get_current_user(token: str = Depends(get_token)) -> User:
     if is_expired:
         raise get_401_http_exception(EXPIRED_TOKEN)
 
-    user = await UsersDAO.find_one_or_none(id=user_id)
+    filters = dict(id=user_id)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_401_http_exception(USER_NOT_FOUND)
 

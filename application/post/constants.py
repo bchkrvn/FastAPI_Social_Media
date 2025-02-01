@@ -1,0 +1,1 @@
+POST_UPDATE_TIMEOUT = 60 * 60 * 24  # 24 часа

@@ -34,7 +34,8 @@ async def all_users(page: int = Query(1, ge=1)):
 
 @admin_router.get("/users/{id_:int}", response_model=SchemaMeGet)
 async def user_id(id_: int):
-    user = await UsersDAO.find_one_or_none(id=id_)
+    filters = dict(id=id_)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_404_http_exception(USER_NOT_FOUND)
     return user
@@ -42,7 +43,8 @@ async def user_id(id_: int):
 
 @admin_router.get("/users/{id_:int}/activate")
 async def activate_user(id_: int):
-    user = await UsersDAO.find_one_or_none(id=id_)
+    filters = dict(id=id_)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_404_http_exception(USER_NOT_FOUND)
 
@@ -55,7 +57,8 @@ async def activate_user(id_: int):
 
 @admin_router.get("/users/{id_:int}/deactivate")
 async def deactivate_user(id_: int):
-    user = await UsersDAO.find_one_or_none(id=id_)
+    filters = dict(id=id_)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_404_http_exception(USER_NOT_FOUND)
 

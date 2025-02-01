@@ -10,6 +10,7 @@ from application.db.session import connection
 
 class BaseDAO:
     model: Base
+    options = []
 
     @classmethod
     @connection
@@ -18,21 +19,30 @@ class BaseDAO:
         session: AsyncSession,
         filters: dict[str, Any] = None,
         order_by: list[str] = None,
+        options: list = None,
         page: int = 1,
     ) -> list:
         limit = page * settings.PAGE_LIMIT
         offset = (page - 1) * settings.PAGE_LIMIT
         order_by = order_by or ["id"]
         filters = filters or {}
+        options = options or []
+        all_options = cls.options + options
 
-        query = select(cls.model).filter_by(**filters).limit(limit).offset(offset).order_by(*order_by)
-        objects = await session.execute(query)
+        q = select(cls.model).filter_by(**filters)
+        q = q.limit(limit).offset(offset)
+        q = q.order_by(*order_by)
+        q = q.options(*all_options)
+
+        objects = await session.execute(q)
         return objects.scalars().all()
 
     @classmethod
     @connection
-    async def find_one_or_none(cls, session: AsyncSession, **filters):
-        query = select(cls.model).filter_by(**filters)
+    async def find_one_or_none(cls, session: AsyncSession, filters: dict[str, Any], options: list = None):
+        options = options or []
+        all_options = cls.options + options
+        query = select(cls.model).filter_by(**filters).options(*all_options)
         result = await session.execute(query)
         return result.scalar_one_or_none()
 

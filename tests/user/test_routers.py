@@ -54,7 +54,7 @@ class TestMePutRouter:
         response = await auth_client.put(self.url, json=data)
 
         assert response.status_code == HTTP_200_OK, response.json()
-        updated_user = await UsersDAO.find_one_or_none(id=user.id)
+        updated_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
         assert response.json() == {
             "id": user.id,
             "email": data["email"],
@@ -90,7 +90,7 @@ class TestMeDeleteRouter:
         response = await auth_client.delete(self.url)
 
         assert response.status_code == HTTP_200_OK, response.json()
-        deleted_user = await UsersDAO.find_one_or_none(id=user.id)
+        deleted_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
         assert deleted_user.id == user.id
         assert not deleted_user.is_active
         assert COOKIES_TOKEN_KEY not in response.cookies

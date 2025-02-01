@@ -18,7 +18,8 @@ auth_router = APIRouter(
 
 @auth_router.post("/register")
 async def register_user(user_data: SchemaRegister) -> dict:
-    user = await UsersDAO.find_one_or_none(email=user_data.email)
+    filters = dict(email=user_data.email)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if user:
         detail = NOT_UNIQUE_USER.format(user_data.email)
         raise get_409_http_exception(detail)

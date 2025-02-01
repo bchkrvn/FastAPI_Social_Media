@@ -21,7 +21,8 @@ async def me(current_user: User = Depends(get_current_user)):
 
 @user_router.put("/me", response_model=SchemaMeGet)
 async def me_update(user_data: SchemaMePut, current_user: User = Depends(get_current_user)) -> dict:
-    user = await UsersDAO.find_one_or_none(email=user_data.email)
+    filters = dict(email=user_data.email)
+    user = await UsersDAO.find_one_or_none(filters=filters)
     if user and user.id != current_user.id:
         detail = NOT_UNIQUE_USER.format(user_data.email)
         raise get_409_http_exception(detail)
