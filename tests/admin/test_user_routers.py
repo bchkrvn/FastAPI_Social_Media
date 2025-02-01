@@ -23,7 +23,7 @@ from application.user.model import User
 
 
 class TestGetAllUsers:
-    url = "/admin/all_users"
+    url = "/admin/users/"
     first_page_count = settings.PAGE_LIMIT
     second_page_count = 2
 

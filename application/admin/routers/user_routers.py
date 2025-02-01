@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
-from application.admin.depends import get_current_admin
 from application.base.exceptions import get_404_http_exception, get_409_http_exception
 from application.base.schemas import PaginatedResponse
 from application.user.dao import UsersDAO
@@ -13,15 +12,15 @@ from application.user.messages import (
 )
 from application.user.schemas import SchemaMeGet
 
-admin_router = APIRouter(
-    prefix="/admin",
-    tags=["Панель администратора"],
+user_admin_router = APIRouter(
+    prefix="/users",
+    tags=["Управление пользователями"],
     include_in_schema=False,
-    dependencies=[Depends(get_current_admin)],
+    dependencies=[],
 )
 
 
-@admin_router.get("/all_users", response_model=PaginatedResponse[SchemaMeGet])
+@user_admin_router.get("/", response_model=PaginatedResponse[SchemaMeGet])
 async def all_users(page: int = Query(1, ge=1)):
     users = await UsersDAO.find_all(page=page)
     result = {
@@ -32,7 +31,7 @@ async def all_users(page: int = Query(1, ge=1)):
     return result
 
 
-@admin_router.get("/users/{id_:int}", response_model=SchemaMeGet)
+@user_admin_router.get("/{id_:int}", response_model=SchemaMeGet)
 async def user_id(id_: int):
     filters = dict(id=id_)
     user = await UsersDAO.find_one_or_none(filters=filters)
@@ -41,7 +40,7 @@ async def user_id(id_: int):
     return user
 
 
-@admin_router.get("/users/{id_:int}/activate")
+@user_admin_router.get("/{id_:int}/activate")
 async def activate_user(id_: int):
     filters = dict(id=id_)
     user = await UsersDAO.find_one_or_none(filters=filters)
@@ -55,7 +54,7 @@ async def activate_user(id_: int):
     return {"message": SUCCESS_ACTIVATE}
 
 
-@admin_router.get("/users/{id_:int}/deactivate")
+@user_admin_router.get("/{id_:int}/deactivate")
 async def deactivate_user(id_: int):
     filters = dict(id=id_)
     user = await UsersDAO.find_one_or_none(filters=filters)

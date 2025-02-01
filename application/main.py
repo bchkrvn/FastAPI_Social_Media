@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from application.admin.routers import admin_router
+from application.admin.router import admin_router
 from application.auth.router import auth_router
 from application.config import settings
 from application.post.routers import post_router
