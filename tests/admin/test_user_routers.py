@@ -30,6 +30,7 @@ class TestGetAllUsers:
     @pytest.fixture
     async def prepare_data(self, session, drop_user_table):
         # -1 т.к. еще есть учетная запись администратора
+        users = []
         for i in range(self.first_page_count + self.second_page_count - 1):
             data = {
                 "email": f"test{i}@test.ru",
@@ -39,55 +40,52 @@ class TestGetAllUsers:
                 "date_of_birth": datetime.date(year=2025, day=1, month=1),
             }
             user = User(**data)
+            users.append(user)
             session.add(user)
 
         await session.commit()
 
+    async def get_expected_data(self, page):
+        users = await UserDAO.find_all(page=page)
+        result = [
+            {
+                "id": u.id,
+                "email": u.email,
+                "first_name": u.first_name,
+                "last_name": u.last_name,
+                "date_of_birth": str(u.date_of_birth),
+                "is_active": u.is_active,
+                "created": u.created.isoformat(),
+                "updated": u.updated.isoformat(),
+            }
+            for u in users
+        ]
+        return result
+
     @pytest.mark.anyio
     async def test_all_users_200_first_page(self, auth_admin_client, prepare_data):
+        PAGE = 1
         response_without_page = await auth_admin_client.get(self.url)
-        response_with_page = await auth_admin_client.get(self.url, params={"page": 1})
+        response_with_page = await auth_admin_client.get(self.url, params={"page": PAGE})
 
         for r in (response_with_page, response_without_page):
             assert r.status_code == HTTP_200_OK
-            data = r.json()
-            assert data.get("page") == 1
-            assert data.get("count") == self.first_page_count
-            assert "items" in data
-            assert len(data["items"]) == self.first_page_count
-            keys = {
-                "id",
-                "email",
-                "first_name",
-                "last_name",
-                "date_of_birth",
-                "is_active",
-                "created",
-                "updated",
-            }
-            assert set(data["items"][0]) == keys
+            items = await self.get_expected_data(page=PAGE)
+            assert r.json() == {"page": 1, "count": self.first_page_count, "items": items[: self.first_page_count]}
 
     @pytest.mark.anyio
     async def test_all_users_200_last_page(self, auth_admin_client, prepare_data):
-        response = await auth_admin_client.get(self.url, params={"page": 2})
+        PAGE = 2
+        response = await auth_admin_client.get(self.url, params={"page": PAGE})
 
         assert response.status_code == HTTP_200_OK
-        data = response.json()
-        assert data.get("page") == 2
-        assert data.get("count") == self.second_page_count
-        assert "items" in data
-        assert len(data["items"]) == self.second_page_count
-        keys = {
-            "id",
-            "email",
-            "first_name",
-            "last_name",
-            "date_of_birth",
-            "is_active",
-            "created",
-            "updated",
+        items = await self.get_expected_data(page=PAGE)
+        start = -self.second_page_count
+        assert response.json() == {
+            "page": PAGE,
+            "count": self.second_page_count,
+            "items": items[start:],
         }
-        assert set(data["items"][0]) == keys
 
     @pytest.mark.anyio
     async def test_all_users_403(self, auth_client, prepare_data):
@@ -107,7 +105,7 @@ class TestGetUserById:
     url = "/admin/users/"
 
     @pytest.mark.anyio
-    async def test_get_user_200_first_page(self, auth_admin_client, user):
+    async def test_get_user_200(self, auth_admin_client, user):
         response = await auth_admin_client.get(self.url + str(user.id))
 
         assert response.status_code == HTTP_200_OK
