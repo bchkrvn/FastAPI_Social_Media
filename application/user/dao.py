@@ -6,7 +6,7 @@ from application.db.session import connection
 from .model import User
 
 
-class UsersDAO(BaseDAO):
+class UserDAO(BaseDAO):
     model = User
 
     @classmethod

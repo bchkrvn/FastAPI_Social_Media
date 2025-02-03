@@ -11,7 +11,7 @@ from application.config import settings
 from application.db.base_model import Base
 from application.main import app
 from application.post.model import Post
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.model import User
 from application.user.password import get_password_hash
 
@@ -78,7 +78,7 @@ async def user(password, drop_user_table) -> User:
         "last_name": "test_lastname",
         "date_of_birth": datetime.date(year=2025, day=1, month=1),
     }
-    return await UsersDAO.add(**user_data)
+    return await UserDAO.add(**user_data)
 
 
 @pytest.fixture(scope="function")
@@ -91,7 +91,7 @@ async def admin(password, drop_user_table) -> User:
         "date_of_birth": datetime.date(year=2025, day=1, month=1),
         "is_admin": True,
     }
-    return await UsersDAO.add(**user_data)
+    return await UserDAO.add(**user_data)
 
 
 @pytest.fixture(scope="function")

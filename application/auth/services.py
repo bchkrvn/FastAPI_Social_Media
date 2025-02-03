@@ -5,7 +5,7 @@ from jose import jwt
 from application.auth.constants import TOKEN_EXPIRED_KEY, USER_ID_KEY
 from application.auth.schemas import SchemaLogin
 from application.config import settings
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.model import User
 from application.user.password import verify_password
 
@@ -22,7 +22,7 @@ def create_access_token(user: User) -> str:
 
 async def auth_user(user_data: SchemaLogin) -> User | None:
     filters = dict(email=user_data.email)
-    user = await UsersDAO.find_one_or_none(filters=filters)
+    user = await UserDAO.find_one_or_none(filters=filters)
     if not user:
         return None
 

@@ -3,7 +3,7 @@ import datetime
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.model import User
 
 
@@ -24,27 +24,27 @@ class TestUserDAO:
             session.add(user)
         await session.commit()
 
-        users = await UsersDAO.find_all_active_user()
+        users = await UserDAO.find_all_active_user()
 
         assert len(users) == user_count / 2
 
     @pytest.mark.anyio
     async def test_deactivate(self, user: User):
         assert user.is_active
-        await UsersDAO.deactivate(user)
-        not_active_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
+        await UserDAO.deactivate(user)
+        not_active_user = await UserDAO.find_one_or_none(filters=dict(id=user.id))
         assert not_active_user.id == user.id
         assert not not_active_user.is_active
 
     @pytest.mark.anyio
     async def test_activate(self, user: User, session: AsyncSession):
-        await UsersDAO.deactivate(user)
-        not_active_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
+        await UserDAO.deactivate(user)
+        not_active_user = await UserDAO.find_one_or_none(filters=dict(id=user.id))
         assert not not_active_user.is_active
         assert not_active_user.id == user.id
 
-        await UsersDAO.activate(user)
+        await UserDAO.activate(user)
 
-        active_user = await UsersDAO.find_one_or_none(filters=dict(id=user.id))
+        active_user = await UserDAO.find_one_or_none(filters=dict(id=user.id))
         assert active_user.id == user.id
         assert active_user.is_active

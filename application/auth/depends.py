@@ -7,7 +7,7 @@ from application.auth.constants import COOKIES_TOKEN_KEY, TOKEN_EXPIRED_KEY, USE
 from application.auth.messages import EXPIRED_TOKEN, NOT_VALID_TOKEN_DATA, TOKEN_NOT_FOUND, TOKEN_NOT_VALID
 from application.auth.services import decode_access_token
 from application.base.exceptions import get_401_http_exception
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.messages import USER_NOT_ACTIVE, USER_NOT_FOUND
 from application.user.model import User
 
@@ -42,7 +42,7 @@ async def get_current_user(token: str = Depends(get_token)) -> User:
         raise get_401_http_exception(EXPIRED_TOKEN)
 
     filters = dict(id=user_id)
-    user = await UsersDAO.find_one_or_none(filters=filters)
+    user = await UserDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_401_http_exception(USER_NOT_FOUND)
 

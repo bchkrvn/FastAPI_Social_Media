@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query
 
 from application.base.exceptions import get_404_http_exception, get_409_http_exception
 from application.base.schemas import PaginatedResponse
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.messages import (
     SUCCESS_ACTIVATE,
     SUCCESS_DEACTIVATE,
@@ -22,7 +22,7 @@ user_admin_router = APIRouter(
 
 @user_admin_router.get("/", response_model=PaginatedResponse[SchemaMeGet])
 async def all_users(page: int = Query(1, ge=1)):
-    users = await UsersDAO.find_all(page=page)
+    users = await UserDAO.find_all(page=page)
     result = {
         "items": users,
         "page": page,
@@ -32,9 +32,9 @@ async def all_users(page: int = Query(1, ge=1)):
 
 
 @user_admin_router.get("/{id_:int}", response_model=SchemaMeGet)
-async def user_id(id_: int):
+async def get_user(id_: int):
     filters = dict(id=id_)
-    user = await UsersDAO.find_one_or_none(filters=filters)
+    user = await UserDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_404_http_exception(USER_NOT_FOUND)
     return user
@@ -43,26 +43,26 @@ async def user_id(id_: int):
 @user_admin_router.get("/{id_:int}/activate")
 async def activate_user(id_: int):
     filters = dict(id=id_)
-    user = await UsersDAO.find_one_or_none(filters=filters)
+    user = await UserDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_404_http_exception(USER_NOT_FOUND)
 
     if user.is_active:
         raise get_409_http_exception(USER_ALREADY_ACTIVE)
 
-    await UsersDAO.activate(user)
+    await UserDAO.activate(user)
     return {"message": SUCCESS_ACTIVATE}
 
 
 @user_admin_router.get("/{id_:int}/deactivate")
 async def deactivate_user(id_: int):
     filters = dict(id=id_)
-    user = await UsersDAO.find_one_or_none(filters=filters)
+    user = await UserDAO.find_one_or_none(filters=filters)
     if not user:
         raise get_404_http_exception(USER_NOT_FOUND)
 
     if not user.is_active:
         raise get_409_http_exception(USER_ALREADY_DEACTIVE)
 
-    await UsersDAO.deactivate(user)
+    await UserDAO.deactivate(user)
     return {"message": SUCCESS_DEACTIVATE}

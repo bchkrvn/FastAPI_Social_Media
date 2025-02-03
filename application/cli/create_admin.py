@@ -3,7 +3,7 @@ from getpass import getpass
 
 import regex as re
 
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.password import get_password_hash
 
 
@@ -73,7 +73,7 @@ class AdminCreator:
                 print("\nНеверный формат электронной почты\n")
                 continue
 
-            is_unique = not await UsersDAO.find_one_or_none(filters={"email": email})
+            is_unique = not await UserDAO.find_one_or_none(filters={"email": email})
             if not is_unique:
                 print("\nПользователь с данной почтой уже существует\n")
                 continue
@@ -139,4 +139,4 @@ class AdminCreator:
         return True
 
     async def _create_admin(self):
-        await UsersDAO.add(**self.__data)
+        await UserDAO.add(**self.__data)

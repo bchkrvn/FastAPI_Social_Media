@@ -11,7 +11,7 @@ from starlette.status import (
 
 from application.admin.messages import NOT_ADMIN
 from application.config import settings
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.messages import (
     SUCCESS_ACTIVATE,
     SUCCESS_DEACTIVATE,
@@ -142,7 +142,7 @@ class TestActivateUser:
 
     @pytest.mark.anyio
     async def test_activate_200(self, auth_admin_client, user):
-        await UsersDAO.deactivate(user)
+        await UserDAO.deactivate(user)
         response = await auth_admin_client.get(self.url.format(user.id))
 
         assert response.status_code == HTTP_200_OK
@@ -196,7 +196,7 @@ class TestDeactivateUser:
 
     @pytest.mark.anyio
     async def test_get_user_409(self, auth_admin_client, user):
-        await UsersDAO.deactivate(user)
+        await UserDAO.deactivate(user)
 
         response = await auth_admin_client.get(self.url.format(user.id))
 

@@ -5,7 +5,7 @@ from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_409_CONFLI
 
 from application.auth.constants import COOKIES_TOKEN_KEY
 from application.auth.messages import NOT_VALID_EMAIL_OR_PASSWORD, SUCCESS_REGISTRATION
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.messages import NOT_UNIQUE_USER
 
 
@@ -32,7 +32,7 @@ class TestAuthRouterRegister:
     async def test_register_user_409(self, client, user):
         user_data = self.user_data.copy()
         user_data["date_of_birth"] = datetime.date(year=2025, day=1, month=1)
-        user = await UsersDAO.add(**user_data)
+        user = await UserDAO.add(**user_data)
 
         response = await client.post(self.url, json=self.user_data)
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response
 
 from application.base.exceptions import get_401_http_exception, get_409_http_exception
-from application.user.dao import UsersDAO
+from application.user.dao import UserDAO
 from application.user.messages import NOT_UNIQUE_USER
 from application.user.password import get_password_hash
 
@@ -19,14 +19,14 @@ auth_router = APIRouter(
 @auth_router.post("/register")
 async def register_user(user_data: SchemaRegister) -> dict:
     filters = dict(email=user_data.email)
-    user = await UsersDAO.find_one_or_none(filters=filters)
+    user = await UserDAO.find_one_or_none(filters=filters)
     if user:
         detail = NOT_UNIQUE_USER.format(user_data.email)
         raise get_409_http_exception(detail)
 
     user_dict = user_data.model_dump()
     user_dict["password"] = get_password_hash(user_data.password)
-    await UsersDAO.add(**user_dict)
+    await UserDAO.add(**user_dict)
 
     return {"message": SUCCESS_REGISTRATION}
 
