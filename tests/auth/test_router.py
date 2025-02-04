@@ -16,6 +16,7 @@ class TestAuthRouterRegister:
     user_data = {
         "email": "test@test.ru",
         "password": "Aa12345@",
+        "password2": "Aa12345@",
         "first_name": "test_name",
         "last_name": "test_lastname",
         "date_of_birth": "01.01.2025",
@@ -25,18 +26,19 @@ class TestAuthRouterRegister:
     async def test_register_user_200(self, client, drop_user_table):
         response = await client.post(self.url, json=self.user_data)
 
-        assert response.status_code == HTTP_200_OK, response.json()
+        assert response.status_code == HTTP_200_OK
         assert response.json() == {"message": SUCCESS_REGISTRATION}
 
     @pytest.mark.anyio
     async def test_register_user_409(self, client, user):
         user_data = self.user_data.copy()
         user_data["date_of_birth"] = datetime.date(year=2025, day=1, month=1)
+        del user_data["password2"]
         user = await UserDAO.add(**user_data)
 
         response = await client.post(self.url, json=self.user_data)
 
-        assert response.status_code == HTTP_409_CONFLICT, response.json()
+        assert response.status_code == HTTP_409_CONFLICT
         msg = NOT_UNIQUE_USER.format(user.email)
         assert response.json() == {"detail": msg}
 
@@ -44,7 +46,15 @@ class TestAuthRouterRegister:
     async def test_register_user_422(self, client):
         response = await client.post(self.url, json={})
 
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY, response.json()
+        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+
+    @pytest.mark.anyio
+    async def test_register_user_422_password(self, client):
+        user_data = self.user_data.copy()
+        user_data["password2"] += "1"
+        response = await client.post(self.url, json=user_data)
+
+        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
 
 
 class TestAuthRouterLogin:

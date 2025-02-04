@@ -26,6 +26,7 @@ async def register_user(user_data: SchemaRegister) -> dict:
 
     user_dict = user_data.model_dump()
     user_dict["password"] = get_password_hash(user_data.password)
+    del user_dict["password2"]
     await UserDAO.add(**user_dict)
 
     return {"message": SUCCESS_REGISTRATION}
