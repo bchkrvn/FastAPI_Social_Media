@@ -4,7 +4,7 @@ from getpass import getpass
 import regex as re
 
 from application.user.dao import UserDAO
-from application.user.password import get_password_hash
+from application.user.password import PasswordValidator, get_password_hash
 
 
 class AdminCreator:
@@ -109,26 +109,7 @@ class AdminCreator:
             break
 
     def __check_password(self, password: str) -> bool:
-        errors = []
-        if len(password) < self.password_length:
-            msg = f"- Пароль должен содержать как минимум {self.password_length} символов"
-            errors.append(msg)
-
-        if not re.search(r"[A-ZА-ЯЁ]+", password):
-            msg = "- Пароль должен содержать как минимум одну заглавную букву"
-            errors.append(msg)
-
-        if not re.search(r"[a-zа-яё]+", password):
-            msg = "- Пароль должен содержать как минимум одну строчную букву"
-            errors.append(msg)
-
-        if not re.search(r"[0-9]+", password):
-            msg = "- Пароль должен содержать как минимум одну цифру"
-            errors.append(msg)
-
-        if not re.search(self.password_symbols_pattern, password):
-            msg = f"- Пароль должен содержать как минимум один из символов {self.password_symbols}"
-            errors.append(msg)
+        errors = PasswordValidator(password).validate_password()
 
         if errors:
             print("\nПароль не соответствует следующим требованиям:\n")

@@ -21,6 +21,7 @@ class BaseSettings:
     SECRET_KEY = os.getenv("SECRET_KEY")
     ALGORITHM = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
+    PASSWORD_LENGTH = os.getenv("PASSWORD_LENGTH", 8)
 
     # Настройки подключения к БД
     POSTGRES_USER = os.getenv("POSTGRES_USER")

@@ -15,7 +15,7 @@ class TestAuthRouterRegister:
     url = "/auth/register"
     user_data = {
         "email": "test@test.ru",
-        "password": "12341234",
+        "password": "Aa12345@",
         "first_name": "test_name",
         "last_name": "test_lastname",
         "date_of_birth": "01.01.2025",
@@ -25,7 +25,7 @@ class TestAuthRouterRegister:
     async def test_register_user_200(self, client, drop_user_table):
         response = await client.post(self.url, json=self.user_data)
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTP_200_OK, response.json()
         assert response.json() == {"message": SUCCESS_REGISTRATION}
 
     @pytest.mark.anyio
