@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Query
 
-from application.base.exceptions import get_404_http_exception, get_409_http_exception
+from application.base.exceptions import get_403_http_exception, get_404_http_exception, get_409_http_exception
 from application.base.schemas import PaginatedResponse
 from application.user.dao import UserDAO
 from application.user.messages import (
+    ADMIN_CANT_BE_BLOCK,
+    ADMIN_CANT_BE_UNBLOCK,
     SUCCESS_ACTIVATE,
     SUCCESS_DEACTIVATE,
     USER_ALREADY_ACTIVE,
@@ -50,6 +52,9 @@ async def activate_user(id_: int):
     if user.is_active:
         raise get_409_http_exception(USER_ALREADY_ACTIVE)
 
+    if user.is_admin:
+        raise get_403_http_exception(ADMIN_CANT_BE_UNBLOCK)
+
     await UserDAO.activate(user)
     return {"message": SUCCESS_ACTIVATE}
 
@@ -63,6 +68,9 @@ async def deactivate_user(id_: int):
 
     if not user.is_active:
         raise get_409_http_exception(USER_ALREADY_DEACTIVE)
+
+    if user.is_admin:
+        raise get_403_http_exception(ADMIN_CANT_BE_BLOCK)
 
     await UserDAO.deactivate(user)
     return {"message": SUCCESS_DEACTIVATE}

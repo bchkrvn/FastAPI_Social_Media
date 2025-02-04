@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response
 
 from application.base.exceptions import get_401_http_exception, get_409_http_exception
 from application.user.dao import UserDAO
-from application.user.messages import NOT_UNIQUE_USER
+from application.user.messages import NOT_UNIQUE_USER, USER_NOT_ACTIVE
 from application.user.password import get_password_hash
 
 from .constants import COOKIES_TOKEN_KEY
@@ -37,6 +37,9 @@ async def login(response: Response, user_data: SchemaLogin) -> dict:
     user = await auth_user(user_data)
     if not user:
         raise get_401_http_exception(NOT_VALID_EMAIL_OR_PASSWORD)
+
+    if not user.is_active:
+        raise get_401_http_exception(USER_NOT_ACTIVE)
 
     access_token = create_access_token(user)
     response.set_cookie(

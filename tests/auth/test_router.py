@@ -6,7 +6,7 @@ from starlette.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_409_CONFLI
 from application.auth.constants import COOKIES_TOKEN_KEY
 from application.auth.messages import NOT_VALID_EMAIL_OR_PASSWORD, SUCCESS_REGISTRATION
 from application.user.dao import UserDAO
-from application.user.messages import NOT_UNIQUE_USER
+from application.user.messages import NOT_UNIQUE_USER, USER_NOT_ACTIVE
 
 
 class TestAuthRouterRegister:
@@ -99,6 +99,19 @@ class TestAuthRouterLogin:
 
         assert response.status_code == HTTP_401_UNAUTHORIZED
         assert response.json() == {"detail": NOT_VALID_EMAIL_OR_PASSWORD}
+
+    @pytest.mark.anyio
+    async def test_login_401_not_active(self, client, user, password):
+        login_data = {
+            "email": user.email,
+            "password": password,
+        }
+        await UserDAO.update(instance=user, is_active=False)
+
+        response = await client.post(self.url, json=login_data)
+
+        assert response.status_code == HTTP_401_UNAUTHORIZED
+        assert response.json() == {"detail": USER_NOT_ACTIVE}
 
     @pytest.mark.anyio
     async def test_login_422(self, client, user):

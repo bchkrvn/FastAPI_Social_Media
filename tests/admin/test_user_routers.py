@@ -13,6 +13,8 @@ from application.admin.messages import NOT_ADMIN
 from application.config import settings
 from application.user.dao import UserDAO
 from application.user.messages import (
+    ADMIN_CANT_BE_BLOCK,
+    ADMIN_CANT_BE_UNBLOCK,
     SUCCESS_ACTIVATE,
     SUCCESS_DEACTIVATE,
     USER_ALREADY_ACTIVE,
@@ -154,6 +156,16 @@ class TestActivateUser:
         assert response.json() == {"detail": NOT_ADMIN}
 
     @pytest.mark.anyio
+    async def test_get_user_403_admin(self, auth_admin_client, user):
+        user.is_admin = True
+        user.is_active = False
+        await UserDAO.update(user)
+        response = await auth_admin_client.get(self.url.format(user.id))
+
+        assert response.status_code == HTTP_403_FORBIDDEN
+        assert response.json() == {"detail": ADMIN_CANT_BE_UNBLOCK}
+
+    @pytest.mark.anyio
     async def test_get_user_404(self, auth_admin_client):
         response = await auth_admin_client.get(self.url.format(9999999))
 
@@ -179,11 +191,18 @@ class TestDeactivateUser:
         assert response.json() == {"message": SUCCESS_DEACTIVATE}
 
     @pytest.mark.anyio
-    async def test_get_user_403(self, auth_client, user):
+    async def test_get_user_403_not_admin(self, auth_client, user):
         response = await auth_client.get(self.url.format(user.id))
 
         assert response.status_code == HTTP_403_FORBIDDEN
         assert response.json() == {"detail": NOT_ADMIN}
+
+    @pytest.mark.anyio
+    async def test_get_user_403_deactivate_admin(self, auth_admin_client, admin):
+        response = await auth_admin_client.get(self.url.format(admin.id))
+
+        assert response.status_code == HTTP_403_FORBIDDEN
+        assert response.json() == {"detail": ADMIN_CANT_BE_BLOCK}
 
     @pytest.mark.anyio
     async def test_get_user_404(self, auth_admin_client):
