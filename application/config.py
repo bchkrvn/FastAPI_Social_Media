@@ -45,12 +45,6 @@ class TestSettings(BaseSettings):
     # Настройки безопасности:
     SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
 
-    # Настройки подключения к БД
-    TEST_DATABASE_URL = (
-        f"postgresql://{BaseSettings.POSTGRES_USER}:{BaseSettings.POSTGRES_PASSWORD}@{BaseSettings.POSTGRES_HOST}:"
-        f"{BaseSettings.POSTGRES_PORT}/{BaseSettings.POSTGRES_DB}"
-    )
-
 
 class ProdSettings(BaseSettings):
     DEBUG = False

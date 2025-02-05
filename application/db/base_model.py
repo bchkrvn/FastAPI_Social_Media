@@ -20,3 +20,6 @@ class Base(AsyncAttrs, DeclarativeBase):
         fields = set(self.__dict__)
         fields.remove("_sa_instance_state")
         return fields
+
+    def __repr__(self):
+        return str(self)

@@ -14,6 +14,7 @@ from application.config import settings
 from application.db.base_model import Base
 from application.post.model import Post
 from application.user.model import User
+from application.subscription.model import Subscription
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
