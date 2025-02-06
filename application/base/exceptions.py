@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from sqlalchemy.exc import StatementError
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from application.admin.messages import NOT_ADMIN
@@ -34,3 +35,18 @@ def get_409_http_exception(detail: str) -> HTTPException:
         detail=detail,
     )
     return ex
+
+
+def get_original_error(ex: StatementError) -> Exception | None:
+    return ex.orig.__cause__
+
+
+class BaseAppException(Exception):
+    """Базовый класс ошибки для приложения"""
+
+    def __init__(self, msg: str = None, details: dict = None):
+        self.msg = msg
+        self.details = details
+
+    def __str__(self):
+        return self.msg

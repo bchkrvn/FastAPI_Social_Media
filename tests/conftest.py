@@ -11,6 +11,7 @@ from application.config import settings
 from application.db.base_model import Base
 from application.main import app
 from application.post.model import Post
+from application.subscription.model import Subscription
 from application.user.dao import UserDAO
 from application.user.model import User
 from application.user.password import get_password_hash
@@ -108,3 +109,11 @@ async def drop_post_table(engine: AsyncEngine) -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Post.metadata.drop_all)
         await conn.run_sync(Post.metadata.create_all)
+
+
+@pytest.fixture(scope="function")
+async def drop_subscription_table(engine: AsyncEngine) -> None:
+    yield
+    async with engine.begin() as conn:
+        await conn.run_sync(Subscription.metadata.drop_all)
+        await conn.run_sync(Subscription.metadata.create_all)
