@@ -83,6 +83,18 @@ async def user(password, drop_user_table) -> User:
 
 
 @pytest.fixture(scope="function")
+async def user_2(password, drop_user_table) -> User:
+    user_data = {
+        "email": f"{secrets.token_urlsafe(10)}@test.test",
+        "password": get_password_hash(password),
+        "first_name": "test_name",
+        "last_name": "test_lastname",
+        "date_of_birth": datetime.date(year=2025, day=1, month=1),
+    }
+    return await UserDAO.add(**user_data)
+
+
+@pytest.fixture(scope="function")
 async def admin(password, drop_user_table) -> User:
     user_data = {
         "email": f"{secrets.token_urlsafe(10)}@test.test",

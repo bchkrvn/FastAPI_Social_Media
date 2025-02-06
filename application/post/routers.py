@@ -9,7 +9,11 @@ from .dao import PostDAO
 from .messages import POST_DELETED, POST_NOT_AUTHOR, POST_NOT_FOUND, POST_TIMEOUT
 from .schemas import PostCreateSchema, PostGetSchema, PostUpdateSchema
 
-post_router = APIRouter(prefix="/posts", tags=["Публикации"], dependencies=[Depends(get_current_user)])
+post_router = APIRouter(
+    prefix="/posts",
+    tags=["Публикации"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @post_router.post("/", response_model=PostGetSchema)
