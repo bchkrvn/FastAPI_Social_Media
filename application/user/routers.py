@@ -3,11 +3,12 @@ from fastapi import APIRouter, Depends, Response
 from application.auth.constants import COOKIES_TOKEN_KEY
 from application.auth.depends import get_current_user
 from application.base.exceptions import get_409_http_exception
+from application.subscription.dao import SubscriptionDAO
 from application.user.dao import UserDAO
 from application.user.messages import NOT_UNIQUE_USER, PASSWORD_NOT_VALID, SUCCESS_DELETE, SUCCESS_PASSWORD_CHANGE
 from application.user.model import User
 from application.user.password import get_password_hash, verify_password
-from application.user.schemas import SchemaChangePassword, SchemaMeGet, SchemaMePut
+from application.user.schemas import SchemaChangePassword, SchemaMeGet, SchemaMeGetWithSubscriptions, SchemaMePut
 
 user_router = APIRouter(
     prefix="/users",
@@ -15,8 +16,10 @@ user_router = APIRouter(
 )
 
 
-@user_router.get("/me", response_model=SchemaMeGet)
+@user_router.get("/me", response_model=SchemaMeGetWithSubscriptions)
 async def me(current_user: User = Depends(get_current_user)):
+    current_user.followers_count = await SubscriptionDAO.get_followers_count(user_id=current_user.id)
+    current_user.subscriptions_count = await SubscriptionDAO.get_subscriptions_count(user_id=current_user.id)
     return current_user
 
 

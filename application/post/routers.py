@@ -4,7 +4,7 @@ from application.auth.depends import get_current_user
 from application.user.model import User
 
 from ..base.exceptions import get_403_http_exception, get_404_http_exception, get_409_http_exception
-from ..base.schemas import PaginatedResponse
+from ..base.schemas import PaginatedResponse, get_paginated_response
 from .dao import PostDAO
 from .messages import POST_DELETED, POST_NOT_AUTHOR, POST_NOT_FOUND, POST_TIMEOUT
 from .schemas import PostCreateSchema, PostGetSchema, PostUpdateSchema
@@ -28,12 +28,7 @@ async def create_post(post_data: PostCreateSchema, current_user: User = Depends(
 @post_router.get("/", response_model=PaginatedResponse[PostGetSchema])
 async def get_posts(page: int = Query(1, ge=1)):
     posts = await PostDAO.find_all(page=page)
-    result = {
-        "items": posts,
-        "page": page,
-        "count": len(posts),
-    }
-    return result
+    return get_paginated_response(posts, page)
 
 
 @post_router.get("/{post_id}", response_model=PostGetSchema)

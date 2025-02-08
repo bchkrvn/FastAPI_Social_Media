@@ -5,7 +5,7 @@ from application.auth.router import auth_router
 from application.config import settings
 from application.post.routers import post_router
 from application.subscription.routers import subscription_router
-from application.user.router import user_router
+from application.user.routers import user_router
 
 
 def start_app() -> FastAPI:

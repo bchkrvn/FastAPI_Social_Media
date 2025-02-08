@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 
 from application.base.exceptions import get_403_http_exception, get_404_http_exception, get_409_http_exception
-from application.base.schemas import PaginatedResponse
+from application.base.schemas import PaginatedResponse, get_paginated_response
 from application.user.dao import UserDAO
 from application.user.messages import (
     ADMIN_CANT_BE_BLOCK,
@@ -18,19 +18,13 @@ user_admin_router = APIRouter(
     prefix="/users",
     tags=["Управление пользователями"],
     include_in_schema=False,
-    dependencies=[],
 )
 
 
 @user_admin_router.get("/", response_model=PaginatedResponse[SchemaMeGet])
 async def all_users(page: int = Query(1, ge=1)):
     users = await UserDAO.find_all(page=page)
-    result = {
-        "items": users,
-        "page": page,
-        "count": len(users),
-    }
-    return result
+    return get_paginated_response(users, page)
 
 
 @user_admin_router.get("/{id_:int}", response_model=SchemaMeGet)

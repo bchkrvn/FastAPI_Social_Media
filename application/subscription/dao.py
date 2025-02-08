@@ -1,10 +1,13 @@
 from asyncpg import CheckViolationError, ForeignKeyViolationError, UniqueViolationError
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from application.base.dao import BaseDAO
 
 from ..base.exceptions import get_original_error
+from ..db.session import connection
 from .exceptions import BloggerNotFoundError, FollowerNotFoundError, ReSubscriptionError, SubscriptionForYourselfError
 from .model import Subscription
 
@@ -40,3 +43,17 @@ class SubscriptionDAO(BaseDAO):
                 raise FollowerNotFoundError(data)
 
         raise ex
+
+    @classmethod
+    @connection
+    async def get_followers_count(cls, session: AsyncSession, user_id: int):
+        followers_query = select(func.count()).select_from(cls.model).filter_by(blogger_id=user_id)
+        followers_count = await session.scalar(followers_query)
+        return followers_count
+
+    @classmethod
+    @connection
+    async def get_subscriptions_count(cls, session: AsyncSession, user_id: int):
+        subscriptions_query = select(func.count()).select_from(cls.model).filter_by(follower_id=user_id)
+        subscriptions_count = await session.scalar(subscriptions_query)
+        return subscriptions_count

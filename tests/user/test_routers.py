@@ -27,6 +27,8 @@ class TestMeGetRouter:
             "is_active": user.is_active,
             "created": user.created.isoformat(),
             "updated": user.updated.isoformat(),
+            "followers_count": 0,
+            "subscriptions_count": 0,
         }
 
     @pytest.mark.anyio

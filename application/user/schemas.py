@@ -16,6 +16,11 @@ class SchemaMeGet(BaseModel):
     updated: datetime = Field(..., description="Обновлен")
 
 
+class SchemaMeGetWithSubscriptions(SchemaMeGet):
+    followers_count: int = Field(..., description="Количество подписчиков")
+    subscriptions_count: int = Field(..., description="Количество подписок")
+
+
 class SchemaMePut(BaseModel):
     email: str = Field(..., description="Электронная почта")
     first_name: str = Field(..., min_length=3, examples=["Иван"], max_length=50, description="Имя")
