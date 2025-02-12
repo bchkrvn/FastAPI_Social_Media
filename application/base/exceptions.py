@@ -3,6 +3,7 @@ from sqlalchemy.exc import StatementError
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 from application.admin.messages import NOT_ADMIN
+from logs import log
 
 
 def get_401_http_exception(detail: str) -> HTTPException:
@@ -45,6 +46,7 @@ class BaseAppException(Exception):
     """Базовый класс ошибки для приложения"""
 
     def __init__(self, msg: str = None, details: dict = None):
+        log.warning(f"{msg}, {str(details)}")
         self.msg = msg
         self.details = details
 

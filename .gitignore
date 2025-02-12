@@ -186,3 +186,4 @@ fabric.properties
 .pytest_cache
 pg_data
 pg_data_test
+logs/*.txt

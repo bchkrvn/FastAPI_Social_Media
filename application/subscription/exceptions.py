@@ -11,7 +11,8 @@ class ReSubscriptionError(BaseAppException):
     """Ошибка повторной подписки на пользователя"""
 
     def __init__(self, details: dict):
-        self.msg = RE_SUBSCRIBE_ERROR
+        msg = RE_SUBSCRIBE_ERROR
+        super().__init__(msg=msg, details=details)
         self.details = details
 
 
@@ -19,7 +20,8 @@ class SubscriptionForYourselfError(BaseAppException):
     """Ошибка подписки на самого себя"""
 
     def __init__(self, details: dict):
-        self.msg = SUBSCRIBE_FOR_YOURSELF_ERROR
+        msg = SUBSCRIBE_FOR_YOURSELF_ERROR
+        super().__init__(msg=msg, details=details)
         self.details = details
 
 
@@ -27,7 +29,8 @@ class BloggerNotFoundError(BaseAppException):
     """Не найден пользователь, на которого хотят подписаться"""
 
     def __init__(self, details: dict):
-        self.msg = BLOGGER_NOT_FOUND_ERROR
+        msg = BLOGGER_NOT_FOUND_ERROR
+        super().__init__(msg=msg, details=details)
         self.details = details
 
 
@@ -35,5 +38,6 @@ class FollowerNotFoundError(BaseAppException):
     """Не найден подписчик"""
 
     def __init__(self, details: dict):
-        self.msg = FOLLOWER_NOT_FOUND_ERROR
+        msg = FOLLOWER_NOT_FOUND_ERROR
+        super().__init__(msg=msg, details=details)
         self.details = details

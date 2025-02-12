@@ -1,16 +1,21 @@
 import os
 import secrets
-from pathlib import Path
 
 from dotenv import load_dotenv
 
-env_path = Path(".") / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv()
+
+
+def get_bool_env(name: str) -> bool:
+    return os.getenv(name, False) in {"True", "true", "t", "T", "1", 1}
 
 
 class BaseSettings:
+    """Базовый режим"""
+
     DEBUG = False
     DB_DEBUG = False
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "WARNING")
     PROJECT_NAME = "Social Media"
     PROJECT_VERSION = "1.0.0"
     PROJECT_HOST = os.getenv("PROJECT_HOST", "0.0.0.0")
@@ -33,13 +38,20 @@ class BaseSettings:
         f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     )
 
+    def __str__(self):
+        return self.__doc__
+
 
 class DevSettings(BaseSettings):
-    DEBUG = True
-    DB_DEBUG = bool(os.getenv("DB_DEBUG", False))
+    """Разработка"""
+
+    DEBUG = get_bool_env("DEBUG")
+    DB_DEBUG = get_bool_env("DB_DEBUG")
 
 
 class TestSettings(BaseSettings):
+    """Тестирование"""
+
     DEBUG = False
 
     # Настройки безопасности:
@@ -47,12 +59,16 @@ class TestSettings(BaseSettings):
 
 
 class ProdSettings(BaseSettings):
+    """Прод"""
+
     DEBUG = False
 
 
 def get_settings() -> BaseSettings:
-    dev = os.getenv("DEV") == "True"
-    test = os.getenv("TEST") == "True"
+    dev = get_bool_env("DEV")
+    test = get_bool_env("TEST")
+
+    assert not all((dev, test)), "Установлен и режим тестирования, и режим разработки. Можно выбрать только один режим"
 
     if test:
         return TestSettings()
